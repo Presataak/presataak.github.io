@@ -1,0 +1,2083 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentatietool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #000;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background: #1a1a1a;
+            color: #f0f0f0;
+        }
+
+        .frame {
+            width: 100%;
+            max-width: 1400px;
+            aspect-ratio: 16 / 9;
+            border: 8px solid #000;
+            border-radius: 20px;
+            background: #e89956;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        body.dark-mode .frame {
+            border-color: #555;
+            background: #3a3a3a;
+        }
+
+        .content {
+            flex: 1;
+            background: #da8044;
+            margin: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .content {
+            background: #2d2d2d;
+        }
+
+        /* MENU PRINCIPAL */
+        #menuPrincipal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        #menuPrincipal h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        #menuPrincipal p {
+            font-size: 13px;
+            color: #666;
+        }
+
+        body.dark-mode #menuPrincipal p {
+            color: #999;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .menu-btn {
+            padding: 15px 25px;
+            font-size: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #000;
+        }
+
+        body.dark-mode .menu-btn {
+            background: #333;
+            border-color: #555;
+            color: #f0f0f0;
+        }
+
+        .menu-btn:hover {
+            background: #f5f5f5;
+        }
+
+        body.dark-mode .menu-btn:hover {
+            background: #444;
+        }
+
+        .dataset-status {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        body.dark-mode .dataset-status {
+            color: #999;
+        }
+
+        /* DARK MODE TOGGLE */
+        .dark-mode-toggle {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #e89956;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* THEME VARIABLES */
+        :root {
+            --bg-primary: #f0f0f0;
+            --bg-secondary: #ffffff;
+            --bg-accent: #e89956;
+            --text-primary: #000;
+            --text-secondary: #666;
+            --border-color: #ddd;
+            --button-hover: #f5f5f5;
+            --accent-color: #e89956;
+            --accent-hover: #d47a3f;
+        }
+
+        body.theme-standard {
+            --bg-primary: #f0f0f0;
+            --bg-secondary: #ffffff;
+            --bg-accent: #e89956;
+            --text-primary: #000;
+            --text-secondary: #666;
+            --border-color: #ddd;
+            --button-hover: #f5f5f5;
+            --accent-color: #e89956;
+            --accent-hover: #d47a3f;
+        }
+
+        body.theme-dark {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-accent: #3a3a3a;
+            --text-primary: #f0f0f0;
+            --text-secondary: #999;
+            --border-color: #555;
+            --button-hover: #444;
+            --accent-color: #e89956;
+            --accent-hover: #d47a3f;
+        }
+
+        body.theme-presa {
+            --bg-primary: #da8044;
+            --bg-secondary: #f5f5f5;
+            --bg-accent: #da8044;
+            --text-primary: #000;
+            --text-secondary: #333;
+            --border-color: #4286f4;
+            --button-hover: #e89a56;
+            --accent-color: #4286f4;
+            --accent-hover: #2563d8;
+        }
+
+        body.theme-highcontrast {
+            --bg-primary: #ffffff;
+            --bg-secondary: #ffffff;
+            --bg-accent: #000000;
+            --text-primary: #000;
+            --text-secondary: #000;
+            --border-color: #000;
+            --button-hover: #cccccc;
+            --accent-color: #ffff00;
+            --accent-hover: #e6e600;
+        }
+
+        /* EDITOR */
+        #editor {
+            display: flex;
+            gap: 0;
+            height: 100%;
+        }
+
+        .editor-left {
+            width: 220px;
+            background: #f9f9f9;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 12px;
+            gap: 8px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        body.dark-mode .editor-left {
+            background: #2d2d2d;
+            border-right-color: #555;
+        }
+
+        .editor-left > button:not(.add-btn) {
+            padding: 12px;
+            border: none;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            border: 2px solid #ddd;
+            transition: all 0.2s;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #000;
+        }
+
+        body.dark-mode .editor-left > button:not(.add-btn) {
+            background: #333;
+            border-color: #555;
+            color: #f0f0f0;
+        }
+
+        .editor-left > button:not(.add-btn):hover {
+            background: #f0f0f0;
+        }
+
+        body.dark-mode .editor-left > button:not(.add-btn):hover {
+            background: #444;
+        }
+
+        .editor-left > button.selected {
+            background: #e89956;
+            color: white;
+            border-color: #e89956;
+        }
+
+        .add-btn {
+            padding: 10px;
+            background: white;
+            border: 2px dashed #999;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #666;
+            margin-top: auto;
+            transition: all 0.2s;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        body.dark-mode .add-btn {
+            background: #333;
+            border-color: #666;
+            color: #999;
+        }
+
+        .add-btn:hover {
+            background: #f5f5f5;
+        }
+
+        body.dark-mode .add-btn:hover {
+            background: #444;
+        }
+
+        .editor-right {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .editor-header h2 {
+            font-size: 16px;
+        }
+
+        .home-btn {
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .home-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .prop-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .prop-group label {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .prop-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prop-input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            resize: none;
+            background: white;
+            color: #000;
+        }
+
+        body.dark-mode .prop-input {
+            background: #333;
+            border-color: #555;
+            color: #f0f0f0;
+        }
+
+        .prop-input:focus {
+            outline: none;
+            border-color: #e89956;
+        }
+
+        .char-count {
+            font-size: 11px;
+            color: #999;
+        }
+
+        body.dark-mode .char-count {
+            color: #666;
+        }
+
+        .edit-icon-btn {
+            padding: 8px 14px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            font-weight: 600;
+            color: #000;
+        }
+
+        body.dark-mode .edit-icon-btn {
+            background: #333;
+            border-color: #555;
+            color: #f0f0f0;
+        }
+
+        .delete-btn {
+            padding: 6px 10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .delete-btn:hover {
+            background: #ff5252;
+        }
+
+        .edit-icon-btn:hover {
+            background: var(--button-hover);
+        }
+
+        .color-picker-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-preset {
+            width: 35px;
+            height: 35px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-preset.selected {
+            border-color: #000;
+        }
+
+        .custom-color-btn {
+            padding: 8px 12px;
+            background: #000;
+            color: white;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        body.dark-mode .custom-color-btn {
+            border-color: #555;
+            background: #222;
+        }
+
+        .custom-color-btn:hover {
+            opacity: 0.8;
+        }
+
+        .color-wheel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .color-wheel-overlay.active {
+            display: flex;
+        }
+
+        .color-wheel-container {
+            background: white;
+            color: #000;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            gap: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.dark-mode .color-wheel-container {
+            background: #2d2d2d;
+            color: #f0f0f0;
+        }
+
+        #colorWheel {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .color-wheel-slider {
+            width: 300px;
+            height: 30px;
+            margin-top: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid #ddd;
+        }
+
+        .hex-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .hex-input-container label {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .hex-input-container input {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: monospace;
+        }
+
+        .hex-input-container input:focus {
+            outline: none;
+            border-color: #e89956;
+        }
+
+        .wheel-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .wheel-controls button {
+            padding: 8px 18px;
+            background: #e89956;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .wheel-controls button:hover {
+            background: #d47a3f;
+        }
+
+        /* PRACTICE */
+        #practice {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .practice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 2px solid #ddd;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        body.dark-mode .practice-header {
+            border-bottom-color: #555;
+        }
+
+        .practice-header button {
+            padding: 8px 12px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            color: #000;
+        }
+
+        body.dark-mode .practice-header button {
+            background: #333;
+            border-color: #555;
+            color: #f0f0f0;
+        }
+
+        .practice-header button:hover {
+            background: #f0f0f0;
+        }
+
+        body.dark-mode .practice-header button:hover {
+            background: #444;
+        }
+
+        .practice-header button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .practice-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .nav-arrows {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .arrow-btn {
+            width: 45px;
+            height: 45px;
+            border: 2px solid #000;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 22px;
+            font-weight: bold;
+            transition: all 0.2s;
+            color: #000;
+        }
+
+        body.dark-mode .arrow-btn {
+            border-color: #555;
+            background: #333;
+            color: #f0f0f0;
+        }
+
+        .arrow-btn:hover:not(:disabled) {
+            background: #f0f0f0;
+        }
+
+        body.dark-mode .arrow-btn:hover:not(:disabled) {
+            background: #444;
+        }
+
+        .arrow-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .flashcard {
+            width: 380px;
+            height: 450px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 25px;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .flashcard:hover {
+            transform: scale(1.02);
+        }
+
+        .flashcard-content {
+            text-align: center;
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .hints-display {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .hint-item {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+
+        /* INFO OVERLAY */
+        .info-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .info-overlay.active {
+            display: flex;
+        }
+
+        .info-panel {
+            background: white;
+            color: #000;
+            width: 85%;
+            max-width: 650px;
+            height: 75vh;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border: 8px solid #000;
+        }
+
+        body.dark-mode .info-panel {
+            background: #2d2d2d;
+            color: #f0f0f0;
+            border-color: #555;
+        }
+
+        .info-header {
+            padding: 20px;
+            border-bottom: 2px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-mode .info-header {
+            border-bottom-color: #555;
+        }
+
+        .info-header h3 {
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .info-header button {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #000;
+        }
+
+        body.dark-mode .info-header button {
+            background: #333;
+            border-color: #555;
+            color: #f0f0f0;
+        }
+
+        .info-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .info-content h4 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .info-content p {
+            margin-bottom: 8px;
+        }
+
+        .info-footer {
+            padding: 15px 20px;
+            border-top: 2px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-mode .info-footer {
+            border-top-color: #555;
+        }
+
+        .info-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .info-nav button {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            color: #000;
+        }
+
+        body.dark-mode .info-nav button {
+            background: #333;
+            border-color: #555;
+            color: #f0f0f0;
+        }
+
+        .info-nav button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* SCROLLBAR */
+        .scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #999;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        /* CONFIRMATION DIALOG */
+        .confirmation {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            color: #000;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            text-align: center;
+            min-width: 320px;
+        }
+
+        body.dark-mode .confirmation {
+            background: #2d2d2d;
+            color: #f0f0f0;
+        }
+
+        .confirmation.active {
+            display: block;
+        }
+
+        .confirmation-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+        }
+
+        .confirmation-overlay.active {
+            display: block;
+        }
+
+        .confirmation h3 {
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .confirmation-buttons button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .confirm-yes {
+            background: #e89956;
+            color: white;
+        }
+
+        .confirm-yes:hover {
+            background: #d47a3f;
+        }
+
+        .confirm-no {
+            background: #ddd;
+        }
+
+        .confirm-no:hover {
+            background: #bbb;
+        }
+
+        .alert-box {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            color: #000;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 2000;
+            text-align: center;
+            min-width: 320px;
+        }
+
+        body.dark-mode .alert-box {
+            background: #2d2d2d;
+            color: #f0f0f0;
+        }
+
+        .alert-box.active {
+            display: block;
+        }
+
+        .alert-box h3 {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .alert-box button {
+            margin-top: 15px;
+            padding: 8px 20px;
+            background: #e89956;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        @media (max-width: 1200px) {
+            .frame {
+                max-width: 95vw;
+            }
+
+            .practice-content {
+                flex-direction: column;
+            }
+
+            .flashcard {
+                width: 100%;
+                max-width: 360px;
+                height: 380px;
+                font-size: 28px;
+            }
+
+            .editor-left {
+                width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="frame">
+        <div class="content" id="mainContent">
+            <!-- MAIN MENU -->
+            <div id="menuPrincipal" class="screen">
+                <h1>Presentatietool</h1>
+                <p>Deze tool laat je je tekst beter voorbereiden</p>
+                <div class="menu-buttons">
+                    <button class="menu-btn" onclick="goToEditor()">Naar bewerker</button>
+                    <button class="menu-btn" onclick="checkAndGoPractice()">Naar oefenomgeving</button>
+                    <div style="border-top: 2px solid #ddd; margin: 8px 0;"></div>
+                    <button class="menu-btn" onclick="importDataset()">Importeren</button>
+                    <button class="menu-btn" onclick="exportDataset()">Exporteren</button>
+                    <div style="border-top: 2px solid #ddd; margin: 8px 0;"></div>
+                    <button class="menu-btn" onclick="showInfoOverlay()">Informatie tonen</button>
+                </div>
+                <div class="dataset-status">
+                    <strong>Geladen dataset:</strong> <span id="datasetName">Geen</span>
+                </div>
+                <div class="dark-mode-toggle">
+                    <label for="darkModeSwitch">Donkere modus:</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeSwitch" onchange="toggleDarkMode()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- EDITOR -->
+            <div id="editorScreen" class="screen" style="display: none; height: 100%; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 2px solid #ddd; gap: 10px; flex-wrap: wrap;">
+                    <h2 style="font-size: 15px;">Flashcards aanpassen</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="home-btn" onclick="goToPractice()" style="background: #4CAF50; color: white; border: none;">▶ Oefenen</button>
+                        <button class="home-btn" onclick="goToMenu()">⌂ Terug naar hoofdmenu</button>
+                    </div>
+                </div>
+                <div style="display: flex; flex: 1; min-height: 0;">
+                    <div class="editor-left scroll-container" id="keywordList"></div>
+                    <div class="editor-right scroll-container">
+                        <div id="editorProperties" style="display: none;">
+                            <div class="prop-group">
+                                <div class="prop-label-row">
+                                    <label>Naam van sleutelwoord</label>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="propName" class="prop-input" maxlength="20" placeholder="Max 20 tekens" style="flex: 1;" onkeypress="handleKeyPress(event, 'name')">
+                                    <button class="edit-icon-btn" id="nameSaveBtn" onclick="editPropName()">💾</button>
+                                </div>
+                                <div class="char-count"><span id="nameCount">0</span>/20</div>
+                            </div>
+
+                            <div class="prop-group">
+                                <div class="prop-label-row">
+                                    <label>De achterliggende tekst van het sleutelwoord</label>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <textarea id="propText" class="prop-input" maxlength="500" placeholder="Max 500 tekens" style="flex: 1; height: 80px; resize: vertical;" onkeypress="handleKeyPress(event, 'text')"></textarea>
+                                    <button class="edit-icon-btn" id="textSaveBtn" onclick="editPropText()" style="height: fit-content; align-self: flex-start;">💾</button>
+                                </div>
+                                <div class="char-count"><span id="textCount">0</span>/500</div>
+                            </div>
+
+                            <div class="prop-group">
+                                <label>Flashcard kleur</label>
+                                <div class="color-picker-container" id="colorPicker">
+                                    <div class="color-preset" style="background: #ffffff; border: 3px solid #ddd;" data-color="#ffffff" onclick="selectColor(this)"></div>
+                                    <div class="color-preset" style="background: #ff0000;" data-color="#ff0000" onclick="selectColor(this)"></div>
+                                    <div class="color-preset" style="background: #00ff00;" data-color="#00ff00" onclick="selectColor(this)"></div>
+                                    <div class="color-preset" style="background: #0000ff;" data-color="#0000ff" onclick="selectColor(this)"></div>
+                                    <button class="custom-color-btn" id="wheelBtn" onclick="showColorWheel()" style="background: #000; color: white;">Kleurenwiel openen</button>
+                                </div>
+                            </div>
+
+                            <div class="prop-group">
+                                <label>Hints</label>
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="hint1" class="prop-input" maxlength="20" placeholder="Hint 1 - Max 20 tekens" style="flex: 1;" onkeypress="handleKeyPress(event, 'hint1')">
+                                        <button class="edit-icon-btn" id="hint1SaveBtn" onclick="editHint('hint1')" style="height: fit-content;">💾</button>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="hint2" class="prop-input" maxlength="20" placeholder="Hint 2 - Max 20 tekens" style="flex: 1;" onkeypress="handleKeyPress(event, 'hint2')">
+                                        <button class="edit-icon-btn" id="hint2SaveBtn" onclick="editHint('hint2')" style="height: fit-content;">💾</button>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="hint3" class="prop-input" maxlength="20" placeholder="Hint 3 - Max 20 tekens" style="flex: 1;" onkeypress="handleKeyPress(event, 'hint3')">
+                                        <button class="edit-icon-btn" id="hint3SaveBtn" onclick="editHint('hint3')" style="height: fit-content;">💾</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="padding-top: 15px; border-top: 2px solid #ddd;">
+                                <button class="delete-btn" onclick="deleteCurrentKeyword()">🗑 Sleutelwoord verwijderen</button>
+                            </div>
+                        </div>
+
+                        <div id="emptyState" style="display: flex; justify-content: center; align-items: center; height: 100%; color: #999; font-size: 14px;">
+                            <p>Selecteer een sleutelwoord uit de lijst</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRACTICE -->
+            <div id="practiceScreen" class="screen" style="display: none; height: 100%; flex-direction: column;">
+                <div class="practice-header">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="goToMenu()">← Terug naar hoofdmenu</button>
+                        <button onclick="goToEditor()">⚙ Flashcards aanpassen</button>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 12px;">
+                            <input type="checkbox" id="shuffleCheckbox" onchange="toggleShuffle()">
+                            Shuffle flashcards
+                        </label>
+                    </div>
+                    <button onclick="showInfoOverlay()" style="font-size: 12px;">ℹ Informatie tonen</button>
+                </div>
+
+                <div class="practice-content">
+                    <div class="nav-arrows">
+                        <button class="arrow-btn" id="prevBtn" onclick="previousCard()">‹</button>
+                    </div>
+                    <div id="flashcardContainer">
+                        <div id="flashcard" class="flashcard" onclick="flipCard()">
+                            <div class="flashcard-content">
+                                <span id="flashcardText">Laad een flashcard</span>
+                                <div class="hints-display" id="hintsDisplay" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="nav-arrows">
+                        <button class="arrow-btn" id="nextBtn" onclick="nextCard()">›</button>
+                    </div>
+                </div>
+
+                <div class="practice-header" style="border-top: 2px solid #ddd; border-bottom: none;">
+                    <button onclick="showHints()">👁 Hints tonen</button>
+                    <button onclick="flipCard()">🔄 Flashcard omdraaien</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COLOR WHEEL OVERLAY -->
+    <div class="color-wheel-overlay" id="colorWheelOverlay">
+        <div class="color-wheel-container">
+            <h3>Kies een kleur</h3>
+            <div id="colorWheelContainer"></div>
+            <div class="color-wheel-slider" id="brightnessSlider"></div>
+            <div class="hex-input-container">
+                <label>Hex waarde:</label>
+                <input type="text" id="hexInput" placeholder="#000000" maxlength="7">
+            </div>
+            <div class="wheel-controls">
+                <button onclick="confirmColorWheel()">OK</button>
+                <button onclick="closeColorWheel()">Annuleren</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INFO OVERLAY -->
+    <div class="info-overlay" id="infoOverlay">
+        <div class="info-panel">
+            <div class="info-header">
+                <h3>Informatie</h3>
+                <button onclick="closeInfoOverlay()">✕</button>
+            </div>
+            <div class="info-content" id="infoContent"></div>
+            <div class="info-footer">
+                <div class="info-nav">
+                    <button id="infoPrevBtn" onclick="infoPrevPage()" style="display: none;">‹</button>
+                    <button id="infoNextBtn" onclick="infoNextPage()">›</button>
+                </div>
+                <span id="infoPageNum" style="font-size: 12px;">1 / 3</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION DIALOGS -->
+    <div class="confirmation-overlay" id="confirmOverlay"></div>
+    <div class="confirmation" id="confirmDialog">
+        <h3 id="confirmText"></h3>
+        <div class="confirmation-buttons">
+            <button class="confirm-yes" id="confirmYes">Ja</button>
+            <button class="confirm-no" onclick="cancelConfirmation()">Nee</button>
+        </div>
+    </div>
+
+    <!-- ALERT -->
+    <div class="confirmation-overlay" id="alertOverlay"></div>
+    <div class="alert-box" id="alertBox">
+        <h3 id="alertText"></h3>
+        <button onclick="closeAlert()">OK</button>
+    </div>
+
+    <script>
+        // ===== DATA STRUCTURE =====
+        let dataset = {
+            keywords: [],
+            fileName: null
+        };
+
+        let currentKeywordIndex = 0;
+        let isFlipped = false;
+        let isShuffle = false;
+        let shuffleOrder = [];
+        let currentShuffleIndex = 0;
+        let selectedColor = '#ffffff';
+        let infoCurrentPage = 0;
+
+        // ===== INITIAL SETUP =====
+        function initApp() {
+            loadFromLocalStorage();
+            updateDatasetStatus();
+            setupEventListeners();
+            loadDarkMode();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('propName').addEventListener('input', (e) => {
+                document.getElementById('nameCount').textContent = e.target.value.length;
+            });
+
+            document.getElementById('propText').addEventListener('input', (e) => {
+                document.getElementById('textCount').textContent = e.target.value.length;
+            });
+
+            window.addEventListener('beforeunload', (e) => {
+                if (dataset.keywords.length > 0 && !dataset.fileName) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    return '';
+                }
+            });
+        }
+
+        // ===== LOCAL STORAGE =====
+        function saveToLocalStorage() {
+            localStorage.setItem('presentatietool_dataset', JSON.stringify(dataset));
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('presentatietool_dataset');
+            if (saved) {
+                dataset = JSON.parse(saved);
+            }
+        }
+
+        // ===== NAVIGATION =====
+        function goToMenu() {
+            document.getElementById('editorScreen').style.display = 'none';
+            document.getElementById('practiceScreen').style.display = 'none';
+            document.getElementById('menuPrincipal').style.display = 'flex';
+            updateDatasetStatus();
+        }
+
+        function goToEditor() {
+            document.getElementById('menuPrincipal').style.display = 'none';
+            document.getElementById('practiceScreen').style.display = 'none';
+            document.getElementById('editorScreen').style.display = 'flex';
+            refreshKeywordList();
+        }
+
+        function checkAndGoPractice() {
+            if (dataset.keywords.length === 0) {
+                showAlert('Je hebt nog geen flashcards aangemaakt. Ga naar de bewerker om sleutelwoorden toe te voegen.');
+                return;
+            }
+            goToPractice();
+        }
+
+        function goToPractice() {
+            document.getElementById('menuPrincipal').style.display = 'none';
+            document.getElementById('editorScreen').style.display = 'none';
+            document.getElementById('practiceScreen').style.display = 'flex';
+            isFlipped = false;
+            isShuffle = false;
+            document.getElementById('shuffleCheckbox').checked = false;
+            currentKeywordIndex = 0;
+            currentShuffleIndex = 0;
+            displayFlashcard();
+        }
+
+        function confirmBackToMenu() {
+            if (dataset.keywords.length > 0 && !dataset.fileName) {
+                showConfirmation('Ben je zeker dat je je wijzigingen wilt laten verdwijnen?', () => {
+                    goToMenu();
+                });
+            } else {
+                goToMenu();
+            }
+        }
+
+        // ===== EDITOR FUNCTIONALITY =====
+        function refreshKeywordList() {
+            const list = document.getElementById('keywordList');
+            list.innerHTML = '';
+
+            dataset.keywords.forEach((kw, index) => {
+                const btn = document.createElement('button');
+                btn.textContent = kw.name || `Sleutelwoord ${index + 1}`;
+                btn.className = index === currentKeywordIndex ? 'selected' : '';
+                btn.onclick = () => selectKeyword(index);
+                list.appendChild(btn);
+            });
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-btn';
+            addBtn.textContent = '+ Sleutelwoord toevoegen';
+            addBtn.onclick = addKeyword;
+            list.appendChild(addBtn);
+
+            selectKeyword(currentKeywordIndex);
+        }
+
+        function selectKeyword(index) {
+            currentKeywordIndex = index;
+            const buttons = document.querySelectorAll('.editor-left > button:not(.add-btn)');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            if (buttons[index]) buttons[index].classList.add('selected');
+
+            loadKeywordProperties(index);
+        }
+
+        function loadKeywordProperties(index) {
+            const props = document.getElementById('editorProperties');
+            const empty = document.getElementById('emptyState');
+
+            if (index < dataset.keywords.length) {
+                props.style.display = 'block';
+                empty.style.display = 'none';
+
+                const kw = dataset.keywords[index];
+                document.getElementById('propName').value = kw.name || '';
+                document.getElementById('propText').value = kw.text || '';
+                document.getElementById('nameCount').textContent = (kw.name || '').length;
+                document.getElementById('textCount').textContent = (kw.text || '').length;
+
+                document.getElementById('hint1').value = kw.hint1 || '';
+                document.getElementById('hint2').value = kw.hint2 || '';
+                document.getElementById('hint3').value = kw.hint3 || '';
+
+                selectedColor = kw.color || '#ffffff';
+                updateColorPickerUI();
+            } else {
+                props.style.display = 'none';
+                empty.style.display = 'flex';
+            }
+        }
+
+        function addKeyword() {
+            if (dataset.keywords.length >= 100) {
+                showAlert('Maximaal 100 sleutelwoorden toegestaan.');
+                return;
+            }
+            const newKeyword = {
+                name: '',
+                text: '',
+                color: '#ffffff',
+                hint1: '',
+                hint2: '',
+                hint3: ''
+            };
+            dataset.keywords.push(newKeyword);
+            currentKeywordIndex = dataset.keywords.length - 1;
+            saveToLocalStorage();
+            refreshKeywordList();
+        }
+
+        function editPropName() {
+            const value = document.getElementById('propName').value;
+            if (value.length <= 20 && currentKeywordIndex < dataset.keywords.length) {
+                dataset.keywords[currentKeywordIndex].name = value;
+                saveToLocalStorage();
+                refreshKeywordList();
+            }
+        }
+
+        function editPropText() {
+            const value = document.getElementById('propText').value;
+            if (value.length <= 500 && currentKeywordIndex < dataset.keywords.length) {
+                dataset.keywords[currentKeywordIndex].text = value;
+                saveToLocalStorage();
+                refreshKeywordList();
+            }
+        }
+
+        function selectColor(element) {
+            const color = element.dataset.color;
+            selectedColor = color;
+            updateColorPickerUI();
+            if (currentKeywordIndex < dataset.keywords.length) {
+                dataset.keywords[currentKeywordIndex].color = color;
+                saveToLocalStorage();
+            }
+        }
+
+        function updateColorPickerUI() {
+            const presets = document.querySelectorAll('.color-preset');
+            presets.forEach(p => {
+                if (p.dataset.color === selectedColor) {
+                    p.classList.add('selected');
+                } else {
+                    p.classList.remove('selected');
+                }
+            });
+            updateWheelButton();
+        }
+
+        function updateWheelButton() {
+            const btn = document.getElementById('wheelBtn');
+            if (selectedColor.startsWith('hsl')) {
+                btn.style.background = selectedColor;
+                const match = selectedColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+                if (match) {
+                    const l = parseInt(match[3]);
+                    btn.style.color = l > 50 ? '#000' : '#fff';
+                }
+            } else {
+                btn.style.background = selectedColor;
+                btn.style.color = shouldUseDarkText(selectedColor) ? '#000' : '#fff';
+            }
+        }
+
+        function handleKeyPress(event, fieldType) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (fieldType === 'name') {
+                    editPropName();
+                } else if (fieldType === 'text') {
+                    editPropText();
+                } else if (fieldType.startsWith('hint')) {
+                    editHint(fieldType);
+                }
+            }
+        }
+
+        function editHint(hintNumber) {
+            if (currentKeywordIndex < dataset.keywords.length) {
+                const value = document.getElementById(hintNumber).value;
+                if (value.length <= 20) {
+                    dataset.keywords[currentKeywordIndex][hintNumber] = value;
+                    saveToLocalStorage();
+                }
+            }
+        }
+
+        // ===== COLOR WHEEL =====
+        let wheelHue = 0;
+        let wheelBrightness = 50;
+
+        function showColorWheel() {
+            document.getElementById('colorWheelOverlay').classList.add('active');
+            drawColorWheel();
+            drawBrightnessSlider();
+            updateHexInput();
+        }
+
+        function closeColorWheel() {
+            document.getElementById('colorWheelOverlay').classList.remove('active');
+        }
+
+        function drawColorWheel() {
+            const container = document.getElementById('colorWheelContainer');
+            const size = 300;
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const radius = size / 2 - 10;
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', size);
+            svg.setAttribute('height', size);
+            svg.style.cursor = 'crosshair';
+
+            // Draw color wheel
+            for (let angle = 0; angle < 360; angle += 1) {
+                const startAngle = (angle - 1) * Math.PI / 180;
+                const endAngle = angle * Math.PI / 180;
+
+                const x1 = centerX + radius * Math.cos(startAngle);
+                const y1 = centerY + radius * Math.sin(startAngle);
+                const x2 = centerX + radius * Math.cos(endAngle);
+                const y2 = centerY + radius * Math.sin(endAngle);
+
+                const slice = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const d = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
+                slice.setAttribute('d', d);
+                slice.setAttribute('fill', `hsl(${angle}, 100%, ${wheelBrightness}%)`);
+                slice.setAttribute('stroke', 'none');
+
+                slice.addEventListener('click', () => {
+                    wheelHue = angle;
+                    selectedColor = `hsl(${wheelHue}, 100%, ${wheelBrightness}%)`;
+                    updateHexInput();
+                    drawColorWheel();
+                });
+
+                svg.appendChild(slice);
+            }
+
+            // Draw border
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', centerX);
+            circle.setAttribute('cy', centerY);
+            circle.setAttribute('r', radius);
+            circle.setAttribute('fill', 'none');
+            circle.setAttribute('stroke', '#000');
+            circle.setAttribute('stroke-width', '2');
+            svg.appendChild(circle);
+
+            // Draw indicator
+            const indicatorAngle = wheelHue * Math.PI / 180;
+            const indX = centerX + (radius - 5) * Math.cos(indicatorAngle);
+            const indY = centerY + (radius - 5) * Math.sin(indicatorAngle);
+
+            const indicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            indicator.setAttribute('cx', indX);
+            indicator.setAttribute('cy', indY);
+            indicator.setAttribute('r', '8');
+            indicator.setAttribute('fill', 'none');
+            indicator.setAttribute('stroke', '#000');
+            indicator.setAttribute('stroke-width', '3');
+            svg.appendChild(indicator);
+
+            container.innerHTML = '';
+            container.appendChild(svg);
+        }
+
+        function drawBrightnessSlider() {
+            const slider = document.getElementById('brightnessSlider');
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 30;
+            const ctx = canvas.getContext('2d');
+
+            for (let x = 0; x < 300; x++) {
+                const brightness = (x / 300) * 100;
+                ctx.fillStyle = `hsl(${wheelHue}, 100%, ${brightness}%)`;
+                ctx.fillRect(x, 0, 1, 30);
+            }
+
+            slider.innerHTML = '';
+            slider.appendChild(canvas);
+
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                wheelBrightness = Math.round((x / 300) * 100);
+                selectedColor = `hsl(${wheelHue}, 100%, ${wheelBrightness}%)`;
+                updateHexInput();
+                drawBrightnessSlider();
+                drawColorWheel();
+            });
+        }
+
+        function updateHexInput() {
+            const hex = hslToHex(selectedColor);
+            document.getElementById('hexInput').value = hex;
+        }
+
+        function hslToHex(hsl) {
+            const match = hsl.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+            if (!match) return selectedColor;
+
+            let h = parseInt(match[1]);
+            let s = parseInt(match[2]) / 100;
+            let l = parseInt(match[3]) / 100;
+
+            let c = (1 - Math.abs(2 * l - 1)) * s;
+            let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+            let m = l - c / 2;
+            let r = 0, g = 0, b = 0;
+
+            if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+            else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
+            else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
+            else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
+            else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
+            else if (h >= 300 && h < 360) { r = c; g = 0; b = x; }
+
+            r = Math.round((r + m) * 255).toString(16).padStart(2, '0');
+            g = Math.round((g + m) * 255).toString(16).padStart(2, '0');
+            b = Math.round((b + m) * 255).toString(16).padStart(2, '0');
+
+            return `#${r}${g}${b}`.toUpperCase();
+        }
+
+        function hexToHsl(hex) {
+            let r = parseInt(hex.slice(1, 3), 16) / 255;
+            let g = parseInt(hex.slice(3, 5), 16) / 255;
+            let b = parseInt(hex.slice(5, 7), 16) / 255;
+
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                let d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+
+            h = Math.round(h * 360);
+            s = Math.round(s * 100);
+            l = Math.round(l * 100);
+
+            return `hsl(${h}, ${s}%, ${l}%)`;
+        }
+
+        function confirmColorWheel() {
+            const hexInput = document.getElementById('hexInput').value.trim();
+            if (hexInput && /^#[0-9A-Fa-f]{6}$/.test(hexInput)) {
+                selectedColor = hexToHsl(hexInput);
+            }
+            if (currentKeywordIndex < dataset.keywords.length) {
+                dataset.keywords[currentKeywordIndex].color = selectedColor;
+                saveToLocalStorage();
+                updateColorPickerUI();
+            }
+            closeColorWheel();
+        }
+
+        function deleteCurrentKeyword() {
+            if (dataset.keywords.length === 0) return;
+            showConfirmation('Ben je zeker dat je dit sleutelwoord wilt verwijderen?', () => {
+                dataset.keywords.splice(currentKeywordIndex, 1);
+                if (currentKeywordIndex >= dataset.keywords.length && currentKeywordIndex > 0) {
+                    currentKeywordIndex--;
+                }
+                saveToLocalStorage();
+                refreshKeywordList();
+            });
+        }
+
+        // ===== PRACTICE MODE =====
+        function displayFlashcard() {
+            if (dataset.keywords.length === 0) return;
+
+            let index = currentKeywordIndex;
+            if (isShuffle) {
+                if (shuffleOrder.length === 0) {
+                    shuffleOrder = dataset.keywords.map((_, i) => i);
+                    shuffleArray(shuffleOrder);
+                }
+                index = shuffleOrder[currentShuffleIndex];
+            }
+
+            const kw = dataset.keywords[index];
+            const card = document.getElementById('flashcard');
+            const text = document.getElementById('flashcardText');
+            const hintsDisplay = document.getElementById('hintsDisplay');
+
+            card.style.background = kw.color || '#ffffff';
+            card.style.color = shouldUseDarkText(kw.color) ? '#000' : '#fff';
+
+            if (isFlipped) {
+                text.textContent = kw.text || 'Geen tekst ingevuld';
+                hintsDisplay.style.display = 'none';
+            } else {
+                text.textContent = kw.name || 'Geen naam ingevuld';
+                hintsDisplay.style.display = 'none';
+            }
+
+            updateNavButtons();
+        }
+
+        function shouldUseDarkText(color) {
+            if (!color) return true;
+            if (color === '#ffffff' || color === '#fff') return true;
+            if (color === '#ffff00' || color === '#00ff00') return true;
+
+            const rgb = parseInt(color.slice(1), 16);
+            const r = (rgb >> 16) & 255;
+            const g = (rgb >> 8) & 255;
+            const b = rgb & 255;
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.5;
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            displayFlashcard();
+        }
+
+        function showHints() {
+            if (dataset.keywords.length === 0) return;
+
+            let index = currentKeywordIndex;
+            if (isShuffle) {
+                index = shuffleOrder[currentShuffleIndex];
+            }
+
+            const kw = dataset.keywords[index];
+            const hintsDisplay = document.getElementById('hintsDisplay');
+            hintsDisplay.innerHTML = '';
+
+            [kw.hint1, kw.hint2, kw.hint3].forEach((hint, i) => {
+                if (hint) {
+                    const div = document.createElement('div');
+                    div.className = 'hint-item';
+                    div.textContent = `${i + 1}. ${hint}`;
+                    hintsDisplay.appendChild(div);
+                }
+            });
+
+            hintsDisplay.style.display = hintsDisplay.children.length > 0 ? 'flex' : 'none';
+        }
+
+        function nextCard() {
+            if (isShuffle) {
+                if (currentShuffleIndex < shuffleOrder.length - 1) {
+                    currentShuffleIndex++;
+                    isFlipped = false;
+                    displayFlashcard();
+                }
+            } else {
+                if (currentKeywordIndex < dataset.keywords.length - 1) {
+                    currentKeywordIndex++;
+                    isFlipped = false;
+                    displayFlashcard();
+                }
+            }
+        }
+
+        function previousCard() {
+            if (isShuffle) {
+                if (currentShuffleIndex > 0) {
+                    currentShuffleIndex--;
+                    isFlipped = false;
+                    displayFlashcard();
+                }
+            } else {
+                if (currentKeywordIndex > 0) {
+                    currentKeywordIndex--;
+                    isFlipped = false;
+                    displayFlashcard();
+                }
+            }
+        }
+
+        function toggleShuffle() {
+            isShuffle = document.getElementById('shuffleCheckbox').checked;
+            if (isShuffle) {
+                shuffleOrder = dataset.keywords.map((_, i) => i);
+                shuffleArray(shuffleOrder);
+                currentShuffleIndex = 0;
+            } else {
+                currentKeywordIndex = 0;
+                shuffleOrder = [];
+            }
+            isFlipped = false;
+            displayFlashcard();
+        }
+
+        function updateNavButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (isShuffle) {
+                prevBtn.disabled = currentShuffleIndex === 0;
+                nextBtn.disabled = currentShuffleIndex === shuffleOrder.length - 1;
+            } else {
+                prevBtn.disabled = currentKeywordIndex === 0;
+                nextBtn.disabled = currentKeywordIndex === dataset.keywords.length - 1;
+            }
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // ===== IMPORT/EXPORT =====
+        function importDataset() {
+            if (dataset.keywords.length > 0 && !dataset.fileName) {
+                showConfirmation('Weet je zeker dat je je al ingeladen dataset wilt laten verdwijnen?', () => {
+                    triggerFileImport();
+                });
+            } else {
+                triggerFileImport();
+            }
+        }
+
+        function triggerFileImport() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.txt';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (file.size > 50000) {
+                    showAlert('Bestand is te groot. Maximaal 50 KB toegestaan.');
+                    return;
+                }
+
+                if (!file.name.endsWith('.txt')) {
+                    showAlert('Alleen tekstbestanden (.txt) zijn toegestaan.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const content = event.target.result;
+                        const imported = parseImportFile(content);
+                        dataset.keywords = imported;
+                        dataset.fileName = file.name.replace('.txt', '');
+                        currentKeywordIndex = 0;
+                        saveToLocalStorage();
+                        goToEditor();
+                        updateDatasetStatus();
+                    } catch (err) {
+                        showAlert('Ongeldig bestandsformaat. Controleer het bestand.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function parseImportFile(content) {
+            const keywords = [];
+            const lines = content.split('\n');
+
+            const allowedChars = /^[a-zA-Z0-9\s,.\-'!?%#äöüéèêëáàâäãåæéèêëìíîïòóôõöøœúùûüýÿñçÁÀÂÄÃÅÆÉÈÊËÌÍÎÏÒÓÔÕÖØŒÚÙÛÜÝŸÑÇ()]*$/;
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed) continue;
+
+                if (!trimmed.includes('=')) {
+                    throw new Error('Invalid format');
+                }
+
+                const [key, ...valueParts] = trimmed.split('=');
+                let value = valueParts.join('=').replace(/^"/, '').replace(/"$/, '');
+
+                if (!allowedChars.test(value)) {
+                    throw new Error('Invalid characters');
+                }
+
+                const match = key.match(/Sleutelwoord_(\w+)_(\d+)/);
+                if (!match) continue;
+
+                const [, type, index] = match;
+                const kwIndex = parseInt(index) - 1;
+
+                if (!keywords[kwIndex]) {
+                    keywords[kwIndex] = {
+                        name: '',
+                        text: '',
+                        color: '#ffffff',
+                        hint1: '',
+                        hint2: '',
+                        hint3: ''
+                    };
+                }
+
+                if (type === 'naam') keywords[kwIndex].name = value;
+                else if (type === 'tekst') keywords[kwIndex].text = value;
+                else if (type === 'kleur') keywords[kwIndex].color = value;
+                else if (type === 'hint1' || type === 'hint_1') keywords[kwIndex].hint1 = value;
+                else if (type === 'hint2' || type === 'hint_2') keywords[kwIndex].hint2 = value;
+                else if (type === 'hint3' || type === 'hint_3') keywords[kwIndex].hint3 = value;
+            }
+
+            return keywords.filter(k => k !== undefined).slice(0, 100);
+        }
+
+        function exportDataset() {
+            if (dataset.keywords.length === 0) {
+                showAlert('Je hebt geen flashcards om te exporteren.');
+                return;
+            }
+
+            let content = '';
+            dataset.keywords.forEach((kw, index) => {
+                const i = index + 1;
+                content += `Sleutelwoord_naam_${i}="${kw.name}"\n`;
+                content += `Sleutelwoord_tekst_${i}="${kw.text}"\n`;
+                content += `Sleutelwoord_kleur_${i}="${kw.color}"\n`;
+                content += `Sleutelwoord_hint_1_${i}="${kw.hint1}"\n`;
+                content += `Sleutelwoord_hint_2_${i}="${kw.hint2}"\n`;
+                content += `Sleutelwoord_hint_3_${i}="${kw.hint3}"\n`;
+            });
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sleutelwoorden_${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ===== INFO OVERLAY =====
+        function showInfoOverlay() {
+            document.getElementById('infoOverlay').classList.add('active');
+            infoCurrentPage = 0;
+            displayInfoPage();
+        }
+
+        function closeInfoOverlay() {
+            document.getElementById('infoOverlay').classList.remove('active');
+        }
+
+        function displayInfoPage() {
+            const pages = [
+                {
+                    title: 'Flashcards oefenen',
+                    content: `
+                        <h4>Hoe maak je presentatietool_ai_2.jpg:</h4>
+                        <p>1. Ga in het menu naar de oefenomgeving</p>
+                        <p>2. Druk op flashcard omdraaien om het antwoord te zien</p>
+                        <p>3. Druk op hints tonen om je versterkende sleutelwoorden te zien</p>
+                        <p>4. Selecteer shuffle flashcards om flashcards op willekeurige volgorde weer te geven</p>
+                        <p>Je kunt ook navigeren met de pijlknoppen naar vorige en volgende flashcards.</p>
+                    `
+                },
+                {
+                    title: 'Flashcards aanpassen',
+                    content: `
+                        <h4>Hoe maak je presentatietool_ai_1.jpg:</h4>
+                        <p>In de linkerbalk staan allemaal knoppen. Selecteer een sleutelwoord om de eigenschappen aan te passen.</p>
+                        <p>Rechts zie je de naam van sleutelwoord (max 20 tekens), de achterliggende tekst (max 500 tekens), kleur, en 3 hints (max 20 tekens elk).</p>
+                        <p>Gebruik het potlood icoontje om wijzigingen op te slaan.</p>
+                        <p>De kleur van de flashcard kun je selecteren uit voorgedefinieerde kleuren (wit, rood, groen, blauw) of via het kleurenwiel een eigen kleur kiezen.</p>
+                        <p>Je kunt sleutelwoorden verwijderen met de rode knop onder de eigenschappen.</p>
+                        <p>Gebruik de groene "Oefenen" knop om direct naar de oefenomgeving te gaan.</p>
+                    `
+                },
+                {
+                    title: 'Dataset beheren',
+                    content: `
+                        <h4>Hoe maak je presentatietool_ai_3.jpg:</h4>
+                        <p><strong>Naar bewerker:</strong> Ga naar het scherm waar je flashcards kunt maken en aanpassen.</p>
+                        <p><strong>Naar oefenomgeving:</strong> Start het oefenen met je gemaakte flashcards.</p>
+                        <p><strong>Importeren:</strong> Laad een eerder geëxporteerd tekstbestand in. Waarschuwing: een eerder geladen dataset wordt vervangen.</p>
+                        <p><strong>Exporteren:</strong> Download je huidige flashcards als tekstbestand naar je computer.</p>
+                        <p><strong>Informatie tonen:</strong> Lees de help-informatie over hoe je de tool gebruikt.</p>
+                        <p><strong>Geladen dataset:</strong> Toont welke dataset actief is (Geen = leeg, Lokaal = zelf aangemaakt, of de naam van een geïmporteerd bestand).</p>
+                    `
+                }
+            ];
+
+            const page = pages[infoCurrentPage];
+            document.getElementById('infoContent').innerHTML = `<h3>${page.title}</h3>${page.content}`;
+            document.getElementById('infoPageNum').textContent = `${infoCurrentPage + 1} / 3`;
+
+            const prevBtn = document.getElementById('infoPrevBtn');
+            const nextBtn = document.getElementById('infoNextBtn');
+
+            prevBtn.style.display = infoCurrentPage === 0 ? 'none' : 'block';
+            nextBtn.style.display = infoCurrentPage === 2 ? 'none' : 'block';
+        }
+
+        function infoNextPage() {
+            if (infoCurrentPage < 2) {
+                infoCurrentPage++;
+                displayInfoPage();
+            }
+        }
+
+        function infoPrevPage() {
+            if (infoCurrentPage > 0) {
+                infoCurrentPage--;
+                displayInfoPage();
+            }
+        }
+
+        // ===== DIALOG FUNCTIONS =====
+        function showConfirmation(message, onConfirm) {
+            const overlay = document.getElementById('confirmOverlay');
+            const dialog = document.getElementById('confirmDialog');
+            document.getElementById('confirmText').textContent = message;
+
+            overlay.classList.add('active');
+            dialog.classList.add('active');
+
+            document.getElementById('confirmYes').onclick = () => {
+                cancelConfirmation();
+                onConfirm();
+            };
+        }
+
+        function cancelConfirmation() {
+            document.getElementById('confirmOverlay').classList.remove('active');
+            document.getElementById('confirmDialog').classList.remove('active');
+        }
+
+        function showAlert(message) {
+            const overlay = document.getElementById('alertOverlay');
+            const box = document.getElementById('alertBox');
+            document.getElementById('alertText').textContent = message;
+
+            overlay.classList.add('active');
+            box.classList.add('active');
+        }
+
+        function closeAlert() {
+            document.getElementById('alertOverlay').classList.remove('active');
+            document.getElementById('alertBox').classList.remove('active');
+        }
+
+        function updateDatasetStatus() {
+            let statusText = 'Geen';
+            if (dataset.fileName) {
+                statusText = dataset.fileName;
+            } else if (dataset.keywords.length > 0) {
+                statusText = 'Lokaal';
+            }
+            document.getElementById('datasetName').textContent = statusText;
+        }
+
+        // ===== DARK MODE MANAGEMENT =====
+        function toggleDarkMode() {
+            const isDarkMode = document.getElementById('darkModeSwitch').checked;
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('presentatietool_darkmode', 'true');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('presentatietool_darkmode', 'false');
+            }
+        }
+
+        function loadDarkMode() {
+            const isDarkMode = localStorage.getItem('presentatietool_darkmode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeSwitch').checked = true;
+            }
+        }
+
+        // ===== INIT =====
+        initApp();
+    </script>
+</body>
+</html>
