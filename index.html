@@ -128,7 +128,27 @@
         body.dark-mode .dataset-status {
             color: #999;
         }
+		html, body {
+    		height: 100%;
+    		margin: 0;
+		}
 
+		.frame {
+    		height: 100vh;
+    		overflow-y: auto;
+		}
+		
+		.scroll-container {
+    		overflow-y: auto;
+		}
+
+		@media (max-width: 768px) {
+    		.frame {
+        		height: 100vh;
+        		overflow-y: auto;
+    		}
+		}	
+	
         /* DARK MODE TOGGLE */
         .dark-mode-toggle {
             margin-top: 20px;
