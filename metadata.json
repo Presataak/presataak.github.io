@@ -1,6 +1,0 @@
-{
-  "name": "Wereld Topografie Trainer",
-  "description": "Een interactieve topografie-trainer voor basisschoolleerlingen met een wereldkaart, hints en stopwatch.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
